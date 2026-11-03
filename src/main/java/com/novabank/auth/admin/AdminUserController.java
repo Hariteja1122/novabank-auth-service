@@ -1,5 +1,7 @@
 package com.novabank.auth.admin;
 
+import com.novabank.auth.audit.Audit;
+import com.novabank.auth.audit.Audited;
 import com.novabank.auth.common.ApiException;
 import com.novabank.auth.common.CurrentUser;
 import com.novabank.auth.user.Role;
@@ -74,6 +76,7 @@ public class AdminUserController {
     }
 
     @PatchMapping("/{id}/status")
+    @Audited(action = "USER_STATUS_CHANGE", targetType = "USER", targetParam = "id")
     @Transactional
     public UserDto updateStatus(@PathVariable Long id, @Valid @RequestBody StatusRequest req,
                                 @AuthenticationPrincipal Jwt jwt) {
@@ -84,6 +87,8 @@ public class AdminUserController {
         if (user.getRole() == Role.ADMIN) {
             throw ApiException.badRequest("Admin profiles cannot be locked from the console");
         }
+        Audit.detail("from", user.getStatus());
+        Audit.detail("to", req.status());
         user.setStatus(req.status());
         log.info("Admin {} set user {} to {}", CurrentUser.id(jwt), id, req.status());
         return UserDto.from(user);

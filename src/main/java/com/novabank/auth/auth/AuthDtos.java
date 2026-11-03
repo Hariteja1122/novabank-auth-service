@@ -14,6 +14,12 @@ public final class AuthDtos {
     public record LoginRequest(
             @NotBlank @Email String email,
             @NotBlank String password) {
+
+        /** Never print the password, even by accident in a log line. */
+        @Override
+        public String toString() {
+            return "LoginRequest[email=" + email + ", password=****]";
+        }
     }
 
     public record RegisterRequest(
@@ -22,6 +28,11 @@ public final class AuthDtos {
             @Pattern(regexp = "^[+0-9 ()-]{7,20}$", message = "Enter a valid phone number") String phone,
             @NotBlank @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,64}$",
                     message = "Use 8+ characters with upper, lower, number and symbol") String password) {
+
+        @Override
+        public String toString() {
+            return "RegisterRequest[fullName=" + fullName + ", email=" + email + ", phone=" + phone + ", password=****]";
+        }
     }
 
     public record UpdateProfileRequest(
@@ -33,6 +44,11 @@ public final class AuthDtos {
             @NotBlank String currentPassword,
             @NotBlank @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,64}$",
                     message = "Use 8+ characters with upper, lower, number and symbol") String newPassword) {
+
+        @Override
+        public String toString() {
+            return "ChangePasswordRequest[currentPassword=****, newPassword=****]";
+        }
     }
 
     public record AuthResponse(String token, long expiresInSeconds, UserDto user) {
