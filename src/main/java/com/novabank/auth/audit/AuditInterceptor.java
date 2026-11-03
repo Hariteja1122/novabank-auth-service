@@ -33,6 +33,7 @@ import java.util.Map;
 public class AuditInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(AuditInterceptor.class);
+    static final String SERVICE = "auth";
 
     private final AuditWriter writer;
     private final ObjectMapper json;
@@ -76,7 +77,8 @@ public class AuditInterceptor implements HandlerInterceptor {
         }
         int status = ex != null && response.getStatus() < 400 ? 500 : response.getStatus();
         AuditLog entry = new AuditLog();
-        entry.setOccurredAt(Instant.now());
+        entry.setCreatedAt(Instant.now());
+        entry.setService(SERVICE);
         entry.setActorId(ctx.actorId);
         entry.setActorRole(ctx.actorRole);
         entry.setActorEmail(ctx.actorEmail);

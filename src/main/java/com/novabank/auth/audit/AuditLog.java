@@ -11,7 +11,11 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 
-/** One state-changing action, successful or not. Rows are only ever inserted. */
+/**
+ * One state-changing action, successful or not, from any NovaBank service. auth-service owns
+ * this table; account-service and transaction-service report their events through
+ * POST /internal/audit. Rows are only ever inserted.
+ */
 @Entity
 @Table(name = "AUDIT_LOG", schema = "NB_AUTH")
 public class AuditLog {
@@ -23,8 +27,12 @@ public class AuditLog {
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "OCCURRED_AT", nullable = false, updatable = false)
-    private Instant occurredAt;
+    @Column(name = "CREATED_AT", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    /** Which service reported the event: auth, accounts or transactions. */
+    @Column(name = "SERVICE", nullable = false, length = 20, updatable = false)
+    private String service;
 
     @Column(name = "ACTOR_ID", updatable = false)
     private Long actorId;
@@ -64,8 +72,10 @@ public class AuditLog {
     private String sourceIp;
 
     public Long getId() { return id; }
-    public Instant getOccurredAt() { return occurredAt; }
-    public void setOccurredAt(Instant occurredAt) { this.occurredAt = occurredAt; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public String getService() { return service; }
+    public void setService(String service) { this.service = Audit.truncate(service, 20); }
     public Long getActorId() { return actorId; }
     public void setActorId(Long actorId) { this.actorId = actorId; }
     public String getActorRole() { return actorRole; }
