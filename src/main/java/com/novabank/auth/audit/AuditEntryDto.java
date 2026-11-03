@@ -6,17 +6,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.Map;
 
-public record AuditEntryDto(Long id, Instant occurredAt, String service, Long actorId, String actorRole,
+public record AuditEntryDto(Long id, Instant createdAt, String service, Long actorId, String actorRole,
                             String actorEmail, String action, String targetType, String targetId,
                             AuditLog.Outcome outcome, Integer httpStatus, String reason,
                             Map<String, String> details, String correlationId, String sourceIp) {
 
-    static final String SERVICE = "auth";
     private static final TypeReference<Map<String, String>> MAP = new TypeReference<>() {
     };
 
     public static AuditEntryDto from(AuditLog e, ObjectMapper json) {
-        return new AuditEntryDto(e.getId(), e.getOccurredAt(), SERVICE, e.getActorId(), e.getActorRole(),
+        return new AuditEntryDto(e.getId(), e.getCreatedAt(), e.getService(), e.getActorId(), e.getActorRole(),
                 e.getActorEmail(), e.getAction(), e.getTargetType(), e.getTargetId(), e.getOutcome(),
                 e.getHttpStatus(), e.getReason(), parse(e.getDetails(), json), e.getCorrelationId(), e.getSourceIp());
     }
