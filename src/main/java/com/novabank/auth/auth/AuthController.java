@@ -1,5 +1,6 @@
 package com.novabank.auth.auth;
 
+import com.novabank.auth.audit.Audited;
 import com.novabank.auth.auth.AuthDtos.AuthResponse;
 import com.novabank.auth.auth.AuthDtos.ChangePasswordRequest;
 import com.novabank.auth.auth.AuthDtos.LoginRequest;
@@ -30,11 +31,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Audited(action = "LOGIN")
     public AuthResponse login(@Valid @RequestBody LoginRequest req) {
         return authService.login(req);
     }
 
     @PostMapping("/register")
+    @Audited(action = "REGISTER")
     @ResponseStatus(HttpStatus.CREATED)
     public AuthResponse register(@Valid @RequestBody RegisterRequest req) {
         return authService.register(req);
@@ -46,11 +49,13 @@ public class AuthController {
     }
 
     @PutMapping("/me")
+    @Audited(action = "PROFILE_UPDATE")
     public UserDto updateProfile(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody UpdateProfileRequest req) {
         return authService.updateProfile(CurrentUser.id(jwt), req);
     }
 
     @PostMapping("/change-password")
+    @Audited(action = "PASSWORD_CHANGE")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changePassword(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody ChangePasswordRequest req) {
         authService.changePassword(CurrentUser.id(jwt), req);
