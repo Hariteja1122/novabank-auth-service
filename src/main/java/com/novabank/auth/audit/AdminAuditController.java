@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Instant;
 
 /**
- * Audit trail of auth-service: sign-ins (including failed ones), registrations, profile and
- * password changes, and admin changes to users. ROLE_ADMIN at the gateway and here.
- * Reading the trail is itself not audited (only changes are).
+ * The central NovaBank audit trail: sign-ins (including failed ones), profile and admin user
+ * changes from auth-service, plus everything account-service and transaction-service report
+ * through /internal/audit. ROLE_ADMIN at the gateway and here. Reading it is not audited.
  */
 @RestController
-@RequestMapping("/api/admin/audit/auth")
+@RequestMapping("/api/admin/audit")
 public class AdminAuditController {
 
     private final AuditLogRepository repo;
@@ -31,8 +31,9 @@ public class AdminAuditController {
 
     @GetMapping
     public Page<AuditEntryDto> search(@RequestParam(required = false) String action,
+                                      @RequestParam(required = false) String service,
                                       @RequestParam(required = false) AuditLog.Outcome outcome,
-                                      @RequestParam(required = false) Long actorId,
+                                      @RequestParam(required = false) String actor,
                                       @RequestParam(required = false) String targetId,
                                       @RequestParam(required = false) String q,
                                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
@@ -40,8 +41,8 @@ public class AdminAuditController {
                                       @RequestParam(defaultValue = "0") int page,
                                       @RequestParam(defaultValue = "20") int size) {
         var pageable = PageRequest.of(page, Math.min(size, 100),
-                Sort.by(Sort.Direction.DESC, "occurredAt").and(Sort.by(Sort.Direction.DESC, "id")));
-        return repo.findAll(AuditSpecs.filter(action, outcome, actorId, targetId, q, from, to), pageable)
+                Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id")));
+        return repo.findAll(AuditSpecs.filter(action, service, outcome, actor, targetId, q, from, to), pageable)
                 .map(e -> AuditEntryDto.from(e, json));
     }
 }
